@@ -1,0 +1,17 @@
+# headless: false
+
+# instagram:
+#   login_required: true
+
+# facebook:
+#   login_required: true
+
+# tiktok:
+#   login_required: true
+
+# x:
+#   login_required: true
+
+facebook:
+  headless: false        # set to true once you've verified it works
+  browser: "chromium"    # or "firefox" / "webkit"
