@@ -100,10 +100,15 @@ class FacebookScraper:
             except:
                 data["name"] = None
                 data["nickname"] = None
+                
+            try:
+                cover_el = page.query_selector("img[data-imgperflogname='profileCoverPhoto']")
+                data["cover_photo"] = cover_el.get_attribute('src') if cover_el else None
+            except:
+                data["cover_photo"] = None
             
             try:
                 profile_name = data.get("name")
-                print("Profile name:", profile_name)
                 selector = f"svg[aria-label=\"{profile_name}\"] image"
                 profile_svg_img = page.query_selector(selector)
                 if profile_svg_img:
@@ -114,30 +119,25 @@ class FacebookScraper:
                 data["profile_photo"] = None
 
             try:
-                cover_el = page.query_selector("img[alt$=' cover photo']")
-                data["cover_photo"] = cover_el.get_attribute('src') if cover_el else None
-            except:
-                data["cover_photo"] = None
-
-            # Followers or friends count
-            try:
-                # Grab the link element for friends or followers
-                count_el = page.query_selector("a[href*='/friends']:has-text('friends'), a[href*='/followers']:has-text('followers')")
+                count_el = page.query_selector("a[href*='/friends']:has-text('friends'), a[href*='/followers']:has-text('followers'), a[href*='/members']:has-text('members')")
                 raw_text = count_el.inner_text().strip() if count_el else None
                 match = re.search(r"([\d\.]+[KMkm]?)", raw_text) if raw_text else None
                 data["connections_count"] = match.group(1) if match else raw_text
             except Exception as e:
                 print("ERROR fetching connections count:", e)
                 data["connections_count"] = None
-
-            # About / bio section
+                
             try:
-                about_el = page.query_selector("div[data-pagelet^='ProfileTiles'] div[dir='auto']")
-                data["about"] = about_el.inner_text().strip() if about_el else None
-            except:
-                data["about"] = None
+                about_card = (
+                    page
+                    .locator("h2:has-text(\"About\")")
+                    .locator("xpath=ancestor::div[contains(@class,'html-div')]")
+                    .first
+                )
+                data["about_raw"] = about_card.inner_text().strip()
+            except Exception:
+                data["about_raw"] = None
 
-            # Scrape posts
             posts = []
             for _ in range(5):  # scroll iterations
                 articles = page.query_selector_all("div[role='main'] div[role='article']")

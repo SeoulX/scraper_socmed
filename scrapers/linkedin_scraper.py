@@ -5,7 +5,7 @@ import random
 from TikTokApi import TikTokApi
 from playwright.async_api import async_playwright  # async version
 
-class TikTokScraper:
+class LinkedInScraper:
     def __init__(self, config=None):
         self.browser = os.environ.get("TIKTOK_BROWSER", "chromium")
         self.ms_token = None
